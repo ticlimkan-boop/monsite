@@ -11,7 +11,6 @@
   --accent-hover: #818cf8;      /* Violet Indigo pour les interactions */
   --border-color: #334155;      /* Couleur des bordures douces */
 }
-
 body {
   margin: 0;
   padding: 0;
@@ -54,11 +53,9 @@ fieldset {
   box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
   transition: transform 0.3s ease;
 }
-
 .monportfolio img:hover {
   transform: scale(1.05);
 }
-
 /* Titres */
 h1 {
   font-size: 1.8rem;
@@ -68,12 +65,10 @@ h1 {
   margin-bottom: 25px;
   text-transform: uppercase;
 }
-
 h2 {
   font-size: 1.1rem;
   margin: 0;
 }
-
 /* ==========================================
    3. LIENS & BOUTONS INTERACTIFS
    ========================================== */
@@ -82,7 +77,6 @@ a {
   color: var(--text-main);
   transition: all 0.3s ease;
 }
-
 /* Bouton Ma Biographie */
 .monportfolio > p > a {
   display: inline-block;
@@ -93,32 +87,26 @@ a {
   box-shadow: 0 4px 14px rgba(56, 189, 248, 0.4);
   margin-bottom: 20px;
 }
-
 .monportfolio > p > a:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
 }
-
 .monportfolio > p > a h2 {
   color: #ffffff;
 }
-
 /* Liens de navigation Contact / À propos */
 tr.APROPOS td {
   padding: 10px 15px;
 }
-
 tr.APROPOS td a {
   color: var(--text-muted);
   font-weight: 600;
   font-size: 0.95rem;
   letter-spacing: 1px;
 }
-
 tr.APROPOS td a:hover {
   color: var(--accent-color);
 }
-
 /* ==========================================
    4. PIED DE PAGE (FOOTER)
    ========================================== */
