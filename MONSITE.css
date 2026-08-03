@@ -207,7 +207,7 @@ p > h1 {
         font-size: 2.4rem;
     }
     /* réseaux sociaux */
-.APROPOS li {
+.APROPOS ul {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
