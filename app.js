@@ -18,7 +18,17 @@ function createDefaultState() {
         assignments: [{ id: assignmentId, classId, teacherId, subject: 'Mathématiques' }],
         grades: [{ id: gradeId, studentId, classId, teacherId, subject: 'Mathématiques', score: 15.5, date: '2026-08-01' }]
     };
-    
+  document.querySelectorAll('.interactif').forEach(element => {
+    element.addEventListener('click', () => {
+      // Masque l'élément
+      element.classList.add('masque');
+      
+      // Fait réapparaître l'élément après 2000 ms (2 secondes)
+      setTimeout(() => {
+        element.classList.remove('masque');
+      }, 2000);
+    });
+  });  
 }
 
 function loadState() {
