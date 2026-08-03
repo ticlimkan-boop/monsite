@@ -3,14 +3,16 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title> PREMIER SITE WEB </title>
+        <title>PREMIER SITE WEB</title>
+        <!-- Le CSS est dans le même dossier que ce fichier -->
         <link rel="stylesheet" href="EFFETPORF1.CSS">
     </head>
     <body>
         <div class="page-container">
             <div class="profile-card">
                 <div class="profile-card__image">
-                    <img src="../IMG/photo de groupe.jpg" alt="photo de groupe">
+                    <!-- image en local (même dossier que la page) -->
+                    <img src="photo de groupe.jpg" alt="photo de groupe">
                 </div>
                 <div class="profile-card__content">
                     <div class="profile-card__header">
@@ -34,13 +36,28 @@
                         <ul class="social-networks">
                             <li><a href="https://www.facebook.com/" target="_blank" rel="noreferrer">Facebook</a></li>
                             <li><a href="https://www.twitter.com/ticlimkan" target="_blank" rel="noreferrer">Twitter</a></li>
-                            <li><a href="https://www.linkedin.com/in/ticlimkan-kone-755b99413?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" rel="noreferrer">LinkedIn</a></li>
+                            <li><a href="https://www.linkedin.com/in/ticlimkan-kone-755b99413" target="_blank" rel="noreferrer">LinkedIn</a></li>
                             <li><a href="footer.html">Footer</a></li>
                         </ul>
                     </section>
                 </div>
             </div>
         </div>
-        <script src="../JS/app.js"></script>
+
+        <!-- Petit script local pour le bouton "Masquer/Afficher" et pour améliorer la fluidité -->
+        <script>
+            (function(){
+                const btn = document.getElementById('toggle-about');
+                const about = document.querySelector('.about-content');
+                if (!btn || !about) return;
+                btn.addEventListener('click', function(){
+                    about.classList.toggle('hidden');
+                    btn.textContent = about.classList.contains('hidden') ? 'Afficher le texte' : 'Masquer le texte';
+                });
+            })();
+        </script>
+
+        <!-- Chargement du JS global s'il existe (chemin racine) -->
+        <script src="app.js"></script>
     </body>
 </html>
