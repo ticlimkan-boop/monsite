@@ -18,6 +18,7 @@ function createDefaultState() {
         assignments: [{ id: assignmentId, classId, teacherId, subject: 'Mathématiques' }],
         grades: [{ id: gradeId, studentId, classId, teacherId, subject: 'Mathématiques', score: 15.5, date: '2026-08-01' }]
     };
+    
 }
 
 function loadState() {
