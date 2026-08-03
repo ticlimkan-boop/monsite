@@ -206,6 +206,14 @@ p > h1 {
     h1 {
         font-size: 2.4rem;
     }
+    .BIOGRAPHIE{
+         display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+        {
     /* réseaux sociaux */
 .APROPOS ul {
     display: flex;
@@ -216,4 +224,5 @@ p > h1 {
     list-style: none;
     align-text: yes;
 }
+    
 
