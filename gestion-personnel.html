@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registre du personnel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16232E;
+    --ink-soft:#3B4A57;
+    --paper:#F5F4F0;
+    --panel:#FFFFFF;
+    --line:#DCD8CE;
+    --pine:#2F6F62;
+    --pine-dim:#E4EFEC;
+    --blue:#3E6FA8;
+    --blue-dim:#E6EDF4;
+    --purple:#7A5AA8;
+    --purple-dim:#EEE8F5;
+    --amber:#B9791E;
+    --amber-dim:#F6EBDA;
+    --brick:#A6444A;
+    --brick-dim:#F5E4E4;
+    --grey:#6B7280;
+    --grey-dim:#EBEAE6;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:'IBM Plex Sans', sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    display:flex;
+    min-height:100vh;
+  }
+  h1,h2,h3{font-family:'Zilla Slab', serif; margin:0; font-weight:600;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  /* ---- Sidebar ---- */
+  #sidebar{
+    width:230px;
+    flex-shrink:0;
+    background:var(--ink);
+    color:#D9DFE4;
+    padding:22px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:26px;
+  }
+  .brand{padding:0 6px;}
+  .brand h1{color:#fff; font-size:19px; line-height:1.25;}
+  .brand p{margin:4px 0 0; font-size:12px; color:#93A3AF;}
+  nav{display:flex; flex-direction:column; gap:2px;}
+  .navlink{
+    display:flex; align-items:center; gap:10px;
+    padding:9px 10px; border-radius:4px; cursor:pointer;
+    font-size:14px; color:#C7D0D6; border-left:3px solid transparent;
+  }
+  .navlink:hover{background:#1E2E3A;}
+  .navlink.active{background:#1E2E3A; color:#fff; border-left:3px solid var(--pine);}
+  .navlink .count{
+    margin-left:auto; font-size:11px; background:#28394A; color:#B8C4CC;
+    padding:1px 7px; border-radius:20px;
+  }
+  .sidebar-foot{margin-top:auto; font-size:11px; color:#6F818C; padding:0 6px; line-height:1.5;}
+
+  /* ---- Main ---- */
+  #main{flex:1; padding:30px 40px; overflow-y:auto;}
+  .page{display:none;}
+  .page.active{display:block;}
+  .page-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:22px; gap:16px; flex-wrap:wrap;}
+  .page-head h2{font-size:26px;}
+  .page-head .sub{color:var(--ink-soft); font-size:13.5px; margin-top:4px;}
+
+  button{font-family:inherit; cursor:pointer;}
+  .btn{
+    border:1px solid var(--ink); background:var(--ink); color:#fff;
+    padding:9px 16px; border-radius:4px; font-size:13.5px; font-weight:500;
+  }
+  .btn:hover{background:#0F1922;}
+  .btn.secondary{background:transparent; color:var(--ink); border:1px solid var(--line);}
+  .btn.secondary:hover{border-color:var(--ink);}
+  .btn.pine{background:var(--pine); border-color:var(--pine);}
+  .btn.pine:hover{background:#25594E;}
+  .btn.brick{background:var(--brick); border-color:var(--brick);}
+  .btn.brick:hover{background:#8E393E;}
+  .btn.blue{background:var(--blue); border-color:var(--blue);}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .btn.small{padding:5px 11px; font-size:12.5px;}
+  .link-btn{background:none; border:none; color:var(--pine); font-size:13px; padding:0; text-decoration:underline;}
+
+  /* ---- Stat band ---- */
+  .stat-band{display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-bottom:26px;}
+  .stat{background:var(--panel); padding:16px 18px;}
+  .stat .num{font-family:'Zilla Slab',serif; font-size:30px; font-weight:600; line-height:1;}
+  .stat .lbl{font-size:12.5px; color:var(--ink-soft); margin-top:6px;}
+
+  /* ---- Alerts ---- */
+  .alert-box{border:1px solid var(--brick); background:var(--brick-dim); padding:14px 16px; margin-bottom:22px; border-radius:4px;}
+  .alert-box h3{font-size:14.5px; color:var(--brick); margin-bottom:8px;}
+  .alert-row{font-size:13.5px; padding:5px 0; border-top:1px solid rgba(166,68,74,.2);}
+  .alert-row:first-child{border-top:none;}
+
+  /* ---- Panel / table ---- */
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:4px;}
+  .panel + .panel{margin-top:20px;}
+  .panel-head{padding:14px 18px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between;}
+  .panel-head h3{font-size:16px;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  th{text-align:left; font-weight:500; color:var(--ink-soft); font-size:12px; padding:9px 18px; border-bottom:1px solid var(--line);}
+  td{padding:11px 18px; border-bottom:1px solid var(--line); vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr.rowhover:hover{background:#FAFAF8; cursor:pointer;}
+
+  .badge{display:inline-block; padding:3px 9px; border-radius:20px; font-size:12px; font-weight:500;}
+  .badge.disponible{background:var(--grey-dim); color:var(--grey);}
+  .badge.en_service{background:var(--pine-dim); color:var(--pine);}
+  .badge.repos_obligatoire{background:var(--blue-dim); color:var(--blue);}
+  .badge.repos_sanitaire{background:var(--purple-dim); color:var(--purple);}
+  .badge.conge{background:var(--amber-dim); color:var(--amber);}
+  .badge.permission{background:var(--amber-dim); color:#8A6A2E;}
+  .badge.alerte{background:var(--brick-dim); color:var(--brick);}
+
+  input, select, textarea{
+    font-family:inherit; font-size:13.5px; padding:9px 10px; border:1px solid var(--line);
+    border-radius:4px; width:100%; background:#fff; color:var(--ink);
+  }
+  input:focus, select:focus, textarea:focus{outline:none; border-color:var(--pine);}
+  label{font-size:12.5px; color:var(--ink-soft); display:block; margin-bottom:5px;}
+  .field{margin-bottom:14px;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+
+  .empty{padding:36px 18px; text-align:center; color:var(--ink-soft); font-size:13.5px;}
+
+  /* search */
+  .toolbar{display:flex; gap:10px; margin-bottom:16px;}
+  .toolbar input{max-width:280px;}
+
+  /* modal */
+  .overlay{
+    position:fixed; inset:0; background:rgba(22,35,46,.45); display:none;
+    align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto; z-index:50;
+  }
+  .overlay.show{display:flex;}
+  .modal{background:#fff; border-radius:6px; width:100%; max-width:520px; padding:26px 28px; margin-bottom:40px;}
+  .modal h3{font-size:19px; margin-bottom:4px;}
+  .modal .modal-sub{font-size:13px; color:var(--ink-soft); margin-bottom:18px;}
+  .modal-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:20px;}
+
+  /* employee detail */
+  .detail-head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; flex-wrap:wrap; gap:14px;}
+  .detail-id{font-size:13px; color:var(--ink-soft);}
+  .detail-grid{display:grid; grid-template-columns:2fr 1fr; gap:20px; align-items:start;}
+  .infolist{display:grid; grid-template-columns:1fr 1fr; gap:12px 20px;}
+  .infolist .k{font-size:11.5px; color:var(--ink-soft); margin-bottom:2px;}
+  .infolist .v{font-size:14px;}
+  .timeline{padding:16px 18px;}
+  .tl-row{display:flex; gap:12px; padding:10px 0; border-top:1px solid var(--line);}
+  .tl-row:first-child{border-top:none;}
+  .tl-dot{width:8px; height:8px; border-radius:50%; background:var(--pine); margin-top:6px; flex-shrink:0;}
+  .tl-dot.past{background:var(--line);}
+  .tl-main{font-size:13.5px;}
+  .tl-date{font-size:12px; color:var(--ink-soft); margin-top:1px;}
+  .action-grid{display:flex; flex-direction:column; gap:8px;}
+  .countdown{font-size:12.5px; color:var(--ink-soft); margin-top:6px;}
+
+  .chip-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+  .chip{padding:6px 12px; border:1px solid var(--line); border-radius:20px; font-size:12.5px; background:#fff;}
+  .chip button{background:none; border:none; color:var(--brick); margin-left:6px; font-size:13px;}
+
+  ::placeholder{color:#A7ADB2;}
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="brand">
+    <h1>Registre du<br>personnel</h1>
+    <p>Grades · Lieux · Statuts</p>
+  </div>
+  <nav>
+    <div class="navlink active" data-page="dashboard">Tableau de bord</div>
+    <div class="navlink" data-page="employees">Employés <span class="count" id="nav-count-emp">0</span></div>
+    <div class="navlink" data-page="lieux">Lieux de service</div>
+  </nav>
+  <div class="sidebar-foot">
+    Service : 48 h maximum<br>
+    Repos obligatoire : 48 h
+  </div>
+</div>
+
+<div id="main">
+
+  <!-- DASHBOARD -->
+  <section class="page active" id="page-dashboard">
+    <div class="page-head">
+      <div>
+        <h2>Tableau de bord</h2>
+        <div class="sub" id="today-label"></div>
+      </div>
+      <button class="btn pine" onclick="openAddEmployee()">Ajouter une personne </button>
+    </div>
+
+    <div class="stat-band" id="stat-band"></div>
+
+    <div id="alert-zone"></div>
+
+    <div class="panel">
+      <div class="panel-head"><h3>En service actuellement</h3></div>
+      <div id="dash-en-service"></div>
+    </div>
+  </section>
+
+  <!-- EMPLOYEES -->
+  <section class="page" id="page-employees">
+    <div class="page-head">
+      <div>
+        <h2>PERSONEL</h2>
+        <div class="sub">Fiche, grade, lieu et statut de chacun</div>
+      </div>
+      <button class="btn pine" onclick="openAddEmployee()">Ajouter une personne </button>
+    </div>
+    <div class="toolbar">
+      <input type="text" id="search-emp" placeholder="Rechercher un nom, matricule…" oninput="renderEmployeesList()">
+      <select id="filter-statut" onchange="renderEmployeesList()" style="max-width:220px;">
+        <option value="">Tous les statuts</option>
+        <option value="disponible">Disponible</option>
+        <option value="en_service">En service</option>
+        <option value="repos_obligatoire">Repos obligatoire</option>
+        <option value="repos_sanitaire">Repos sanitaire</option>
+        <option value="conge">Congé</option>
+        <option value="permission">Permission</option>
+      </select>
+    </div>
+    <div class="panel">
+      <table>
+        <thead><tr>
+          <!--th>Matricule</th-->
+          <th>Nom</th><th>Grade</th><th>Lieu actuel</th><th>Statut</th><th></th>
+        </tr></thead>
+        <tbody id="employees-tbody"></tbody>
+      </table>
+      <div class="empty" id="employees-empty" style="display:none;">Aucune personne ne correspond à la recherche.</div>
+    </div>
+  </section>
+
+  <!-- EMPLOYEE DETAIL -->
+  <section class="page" id="page-detail">
+    <button class="link-btn" onclick="showPage('employees')" style="margin-bottom:14px;">← Retour à la liste</button>
+    <div id="detail-content"></div>
+  </section>
+
+  <!-- LIEUX -->
+  <section class="page" id="page-lieux">
+    <div class="page-head">
+      <div>
+        <h2>Lieux de service</h2>
+        <div class="sub">Sites disponibles pour l'affectation du personnel</div>
+      </div>
+    </div>
+    <div class="panel" style="padding:18px;">
+      <div class="field" style="display:flex; gap:10px; align-items:flex-end;">
+        <div style="flex:1;">
+          <label>Nom du lieu</label>
+          <input type="text" id="new-lieu" placeholder="Ex : Poste central">
+        </div>
+        <button class="btn pine" onclick="addLieu()">Ajouter</button>
+      </div>
+      <div class="chip-row" id="lieux-chips" style="margin-top:16px;"></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- MODAL: add employee -->
+<div class="overlay" id="overlay-add">
+  <div class="modal">
+    <h3>Nouvelle personne</h3>
+    <div class="modal-sub">Ces informations créent aussi son historique initial de grade et de lieu.</div>
+    <div class="field-row">
+      <div class="field"><label>Prénom</label><input id="f-prenom"></div>
+      <div class="field"><label>Nom</label><input id="f-nom"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Grade actuel</label><input id="f-grade" placeholder="Ex : Brigadier"></div>
+      <div class="field">
+        <label>Lieu de service actuel</label>
+        <select id="f-lieu"></select>
+      </div>
+    </div>
+    <div class="field"><label>Date d'affectation</label><input type="date" id="f-date-embauche"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeOverlay('overlay-add')">Annuler</button>
+      <button class="btn pine" onclick="submitAddEmployee()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: change grade -->
+<div class="overlay" id="overlay-grade">
+  <div class="modal">
+    <h3>Changer de grade</h3>
+    <div class="modal-sub" id="grade-sub"></div>
+    <div class="field"><label>Nouveau grade</label><input id="f-new-grade"></div>
+    <div class="field"><label>Date d'effet</label><input type="date" id="f-grade-date"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeOverlay('overlay-grade')">Annuler</button>
+      <button class="btn pine" onclick="submitChangeGrade()">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: change lieu -->
+<div class="overlay" id="overlay-lieu">
+  <div class="modal">
+    <h3>Changer de lieu de service</h3>
+    <div class="modal-sub" id="lieu-sub"></div>
+    <div class="field"><label>Nouveau lieu</label><select id="f-new-lieu"></select></div>
+    <div class="field"><label>Date d'effet</label><input type="date" id="f-lieu-date"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeOverlay('overlay-lieu')">Annuler</button>
+      <button class="btn pine" onclick="submitChangeLieu()">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: statut (repos sanitaire / congé / permission) -->
+<div class="overlay" id="overlay-statut">
+  <div class="modal">
+    <h3 id="statut-title">Mettre en repos sanitaire</h3>
+    <div class="modal-sub" id="statut-sub"></div>
+    <div class="field-row">
+      <div class="field"><label>Date de début</label><input type="date" id="f-statut-debut"></div>
+      <div class="field"><label>Date de fin prévue</label><input type="date" id="f-statut-fin"></div>
+    </div>
+    <div class="field"><label>Motif</label><textarea id="f-statut-motif" rows="3" placeholder="Ex : certificat médical, événement familial…"></textarea></div>
+    <input type="hidden" id="f-statut-type">
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeOverlay('overlay-statut')">Annuler</button>
+      <button class="btn pine" onclick="submitStatut()">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------------------------------------------------
+   ÉTAT & PERSISTANCE
+--------------------------------------------------------- */
+const HEURE = 3600 * 1000;
+const DUREE_SERVICE_MAX = 48 * HEURE;
+const DUREE_REPOS_OBLIGATOIRE = 48 * HEURE;
+const STORAGE_KEY = 'pgs-etat';
+
+let state = { employees: [], lieux: [] };
+let currentDetailId = null;
+
+function uid(prefix){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
+
+async function loadState(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, false);
+    if(res && res.value){ state = JSON.parse(res.value); }
+  }catch(e){
+    // pas de données existantes -> on garde l'état vide
+  }
+  reconcileStatuses();
+  renderAll();
+}
+
+async function saveState(){
+  try{
+    await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+  }catch(e){
+    console.error('Échec de la sauvegarde', e);
+  }
+}
+
+/* ---------------------------------------------------------
+   RÈGLES 48H — recalcule automatiquement les statuts échus
+--------------------------------------------------------- */
+function reconcileStatuses(){
+  const now = Date.now();
+  state.employees.forEach(emp=>{
+    if(emp.statutCourant === 'repos_obligatoire' && emp.reposFin && now >= emp.reposFin){
+      emp.statutCourant = 'disponible';
+      emp.reposDebut = null;
+      emp.reposFin = null;
+    }
+  });
+}
+
+/* ---------------------------------------------------------
+   NAVIGATION
+--------------------------------------------------------- */
+document.querySelectorAll('.navlink').forEach(el=>{
+  el.addEventListener('click', ()=> showPage(el.dataset.page));
+});
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.navlink').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  const nav = document.querySelector('.navlink[data-page="'+name+'"]');
+  if(nav) nav.classList.add('active');
+  if(name==='dashboard') renderDashboard();
+  if(name==='employees') renderEmployeesList();
+  if(name==='lieux') renderLieux();
+}
+
+/* ---------------------------------------------------------
+   UTILITAIRES D'AFFICHAGE
+--------------------------------------------------------- */
+function fmtDate(ts){
+  if(!ts) return '—';
+  const d = new Date(ts);
+  return d.toLocaleDateString('fr-FR', {day:'2-digit', month:'short', year:'numeric'});
+}
+function fmtDateTime(ts){
+  if(!ts) return '—';
+  const d = new Date(ts);
+  return d.toLocaleDateString('fr-FR', {day:'2-digit', month:'short'}) + ' à ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+}
+function heuresEcoulees(ts){ return (Date.now()-ts)/HEURE; }
+function statutLabel(s){
+  return {
+    disponible:'Disponible', en_service:'En service', repos_obligatoire:'Repos obligatoire',
+    repos_sanitaire:'Repos sanitaire', conge:'Congé', permission:'Permission'
+  }[s] || s;
+}
+function fullName(e){ return e.prenom + ' ' + e.nom; }
+
+/* ---------------------------------------------------------
+   RENDU GLOBAL
+--------------------------------------------------------- */
+function renderAll(){
+  document.getElementById('today-label').textContent =
+    new Date().toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  renderDashboard();
+  renderEmployeesList();
+  renderLieux();
+  document.getElementById('nav-count-emp').textContent = state.employees.length;
+}
+
+/* ---- Dashboard ---- */
+function renderDashboard(){
+  reconcileStatuses();
+  const emp = state.employees;
+  const counts = {disponible:0, en_service:0, repos_obligatoire:0, repos_sanitaire:0, conge:0, permission:0};
+  emp.forEach(e=> counts[e.statutCourant] = (counts[e.statutCourant]||0)+1);
+
+  document.getElementById('stat-band').innerHTML = `
+    <div class="stat"><div class="num">${emp.length}</div><div class="lbl">Employés enregistrés</div></div>
+    <div class="stat"><div class="num">${counts.en_service}</div><div class="lbl">En service</div></div>
+    <div class="stat"><div class="num">${counts.disponible}</div><div class="lbl">Disponibles</div></div>
+    <div class="stat"><div class="num">${counts.repos_obligatoire}</div><div class="lbl">En repos obligatoire</div></div>
+    <div class="stat"><div class="num">${counts.repos_sanitaire + counts.conge + counts.permission}</div><div class="lbl">Sanitaire / congé / permission</div></div>
+  `;
+
+  const depassements = emp.filter(e=> e.statutCourant==='en_service' && heuresEcoulees(e.serviceDebut) > 48);
+  const alertZone = document.getElementById('alert-zone');
+  if(depassements.length){
+    alertZone.innerHTML = `<div class="alert-box"><h3>Dépassement des 48 h de service</h3>` +
+      depassements.map(e=>`<div class="alert-row"><strong>${fullName(e)}</strong> (${e.matricule}) — en service depuis ${heuresEcoulees(e.serviceDebut).toFixed(1)} h. <button class="link-btn" onclick="openDetail('${e.id}')">Voir la fiche</button></div>`).join('') +
+      `</div>`;
+  } else {
+    alertZone.innerHTML = '';
+  }
+
+  const enService = emp.filter(e=>e.statutCourant==='en_service');
+  const tbl = document.getElementById('dash-en-service');
+  if(!enService.length){
+    tbl.innerHTML = '<div class="empty">Personne en service actuellement.</div>';
+  } else {
+    tbl.innerHTML = `<table><thead><tr><th>Nom</th><th>Lieu</th><th>Début de service</th><th>Temps écoulé</th><th></th></tr></thead><tbody>` +
+      enService.map(e=>{
+        const h = heuresEcoulees(e.serviceDebut);
+        const over = h > 48;
+        return `<tr class="rowhover" onclick="openDetail('${e.id}')">
+          <td>${fullName(e)}</td>
+          <td>${e.lieuActuel||'—'}</td>
+          <td>${fmtDateTime(e.serviceDebut)}</td>
+          <td>${over?'<span class="badge alerte">':''}${h.toFixed(1)} h${over?'</span>':''}</td>
+          <td></td>
+        </tr>`;
+      }).join('') + `</tbody></table>`;
+  }
+}
+
+/* ---- Liste employés ---- */
+function renderEmployeesList(){
+  reconcileStatuses();
+  const q = (document.getElementById('search-emp').value || '').toLowerCase();
+  const filtreStatut = document.getElementById('filter-statut').value;
+  const list = state.employees.filter(e=>{
+    const matchQ = !q || fullName(e).toLowerCase().includes(q) || e.matricule.toLowerCase().includes(q);
+    const matchS = !filtreStatut || e.statutCourant === filtreStatut;
+    return matchQ && matchS;
+  });
+  const tbody = document.getElementById('employees-tbody');
+  document.getElementById('employees-empty').style.display = list.length ? 'none' : 'block';
+  tbody.innerHTML = list.map(e=>`
+    <tr class="rowhover" onclick="openDetail('${e.id}')">
+      <td class="mono">${e.matricule}</td>
+      <td>${fullName(e)}</td>
+      <td>${e.gradeActuel}</td>
+      <td>${e.lieuActuel || '—'}</td>
+      <td><span class="badge ${e.statutCourant}">${statutLabel(e.statutCourant)}</span></td>
+      <td style="text-align:right;"><button class="link-btn" onclick="event.stopPropagation(); openDetail('${e.id}')">Ouvrir</button></td>
+    </tr>
+  `).join('');
+}
+
+/* ---- Lieux ---- */
+function renderLieux(){
+  const chips = document.getElementById('lieux-chips');
+  if(!state.lieux.length){
+    chips.innerHTML = '<div class="empty">Aucun lieu enregistré pour le moment.</div>';
+  } else {
+    chips.innerHTML = state.lieux.map(l=>`<span class="chip">${l}<button onclick="removeLieu('${l.replace(/'/g,"\\'")}')" title="Retirer">×</button></span>`).join('');
+  }
+  // rafraîchir les <select> de lieux dans les formulaires
+  [document.getElementById('f-lieu'), document.getElementById('f-new-lieu')].forEach(sel=>{
+    if(!sel) return;
+    const current = sel.value;
+    sel.innerHTML = state.lieux.map(l=>`<option value="${l}">${l}</option>`).join('');
+    if(state.lieux.includes(current)) sel.value = current;
+  });
+}
+
+function addLieu(){
+  const input = document.getElementById('new-lieu');
+  const val = input.value.trim();
+  if(!val) return;
+  if(!state.lieux.includes(val)) state.lieux.push(val);
+  input.value = '';
+  saveState(); renderLieux();
+}
+function removeLieu(l){
+  state.lieux = state.lieux.filter(x=>x!==l);
+  saveState(); renderLieux();
+}
+
+/* ---------------------------------------------------------
+   MODALES GÉNÉRIQUES
+--------------------------------------------------------- */
+function openOverlay(id){ document.getElementById(id).classList.add('show'); }
+function closeOverlay(id){ document.getElementById(id).classList.remove('show'); }
+
+/* ---- Ajout employé ---- */
+function openAddEmployee(){
+  ['f-prenom','f-nom','f-matricule','f-tel','f-grade'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-date-embauche').value = new Date().toISOString().slice(0,10);
+  renderLieux();
+  openOverlay('overlay-add');
+}
+function submitAddEmployee(){
+  const prenom = document.getElementById('f-prenom').value.trim();
+  const nom = document.getElementById('f-nom').value.trim();
+  const matricule = document.getElementById('f-matricule').value.trim();
+  const tel = document.getElementById('f-tel').value.trim();
+  const grade = document.getElementById('f-grade').value.trim();
+  const lieu = document.getElementById('f-lieu').value;
+  const dateEmbauche = document.getElementById('f-date-embauche').value;
+  if(!prenom || !nom || !matricule || !grade){
+    alert('Merci de renseigner au minimum le prénom, le nom, le matricule et le grade.');
+    return;
+  }
+  const now = dateEmbauche ? new Date(dateEmbauche).getTime() : Date.now();
+  const emp = {
+    id: uid('emp'),
+    prenom, nom, matricule, telephone: tel,
+    dateEmbauche: now,
+    gradeActuel: grade,
+    lieuActuel: lieu || null,
+    statutCourant: 'disponible',
+    serviceDebut: null,
+    reposDebut: null, reposFin: null,
+    historiqueGrades: [{grade, dateDebut: now, dateFin: null}],
+    historiqueLieux: lieu ? [{lieu, dateDebut: now, dateFin: null}] : [],
+    historiqueStatuts: []
+  };
+  state.employees.push(emp);
+  saveState();
+  closeOverlay('overlay-add');
+  renderAll();
+  openDetail(emp.id);
+}
+
+/* ---- Changer de grade ---- */
+function openChangeGrade(empId){
+  const e = getEmp(empId);
+  document.getElementById('grade-sub').textContent = `${fullName(e)} — grade actuel : ${e.gradeActuel}`;
+  document.getElementById('f-new-grade').value = '';
+  document.getElementById('f-grade-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('f-grade-date').dataset.empId = empId;
+  openOverlay('overlay-grade');
+}
+function submitChangeGrade(){
+  const empId = document.getElementById('f-grade-date').dataset.empId;
+  const e = getEmp(empId);
+  const nouveauGrade = document.getElementById('f-new-grade').value.trim();
+  const date = document.getElementById('f-grade-date').value;
+  if(!nouveauGrade){ alert('Indiquez le nouveau grade.'); return; }
+  const ts = date ? new Date(date).getTime() : Date.now();
+  const dernier = e.historiqueGrades[e.historiqueGrades.length-1];
+  if(dernier && !dernier.dateFin) dernier.dateFin = ts;
+  e.historiqueGrades.push({grade: nouveauGrade, dateDebut: ts, dateFin: null});
+  e.gradeActuel = nouveauGrade;
+  saveState();
+  closeOverlay('overlay-grade');
+  renderAll();
+  openDetail(empId);
+}
+
+/* ---- Changer de lieu ---- */
+function openChangeLieu(empId){
+  const e = getEmp(empId);
+  document.getElementById('lieu-sub').textContent = `${fullName(e)} — lieu actuel : ${e.lieuActuel || 'non défini'}`;
+  renderLieux();
+  document.getElementById('f-lieu-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('f-lieu-date').dataset.empId = empId;
+  openOverlay('overlay-lieu');
+}
+function submitChangeLieu(){
+  const empId = document.getElementById('f-lieu-date').dataset.empId;
+  const e = getEmp(empId);
+  const nouveauLieu = document.getElementById('f-new-lieu').value;
+  const date = document.getElementById('f-lieu-date').value;
+  if(!nouveauLieu){ alert("Ajoutez d'abord un lieu dans l'onglet « Lieux de service »."); return; }
+  const ts = date ? new Date(date).getTime() : Date.now();
+  const dernier = e.historiqueLieux[e.historiqueLieux.length-1];
+  if(dernier && !dernier.dateFin) dernier.dateFin = ts;
+  e.historiqueLieux.push({lieu: nouveauLieu, dateDebut: ts, dateFin: null});
+  e.lieuActuel = nouveauLieu;
+  saveState();
+  closeOverlay('overlay-lieu');
+  renderAll();
+  openDetail(empId);
+}
+
+/* ---- Statuts : repos sanitaire / congé / permission ---- */
+const STATUT_TITRES = {
+  repos_sanitaire: 'Mettre en repos sanitaire',
+  conge: 'Mettre en congé',
+  permission: 'Accorder une permission'
+};
+function openStatutModal(empId, type){
+  const e = getEmp(empId);
+  document.getElementById('statut-title').textContent = STATUT_TITRES[type];
+  document.getElementById('statut-sub').textContent = fullName(e) + ' — ' + e.matricule;
+  document.getElementById('f-statut-debut').value = new Date().toISOString().slice(0,10);
+  document.getElementById('f-statut-fin').value = '';
+  document.getElementById('f-statut-motif').value = '';
+  document.getElementById('f-statut-type').value = type;
+  document.getElementById('f-statut-type').dataset.empId = empId;
+  openOverlay('overlay-statut');
+}
+function submitStatut(){
+  const empId = document.getElementById('f-statut-type').dataset.empId;
+  const type = document.getElementById('f-statut-type').value;
+  const e = getEmp(empId);
+  const debut = document.getElementById('f-statut-debut').value;
+  const fin = document.getElementById('f-statut-fin').value;
+  const motif = document.getElementById('f-statut-motif').value.trim();
+  if(!debut){ alert('Indiquez une date de début.'); return; }
+  const tsDebut = new Date(debut).getTime();
+  const tsFin = fin ? new Date(fin).getTime() : null;
+  e.historiqueStatuts.push({type, dateDebut: tsDebut, dateFin: tsFin, motif, cloture:false});
+  e.statutCourant = type;
+  e.serviceDebut = null;
+  saveState();
+  closeOverlay('overlay-statut');
+  renderAll();
+  openDetail(empId);
+}
+
+function terminerStatutCourant(empId){
+  const e = getEmp(empId);
+  const dernier = [...e.historiqueStatuts].reverse().find(s=> !s.cloture && ['repos_sanitaire','conge','permission'].includes(s.type));
+  if(dernier){ dernier.cloture = true; dernier.dateFin = Date.now(); }
+  e.statutCourant = 'disponible';
+  saveState();
+  renderAll();
+  openDetail(empId);
+}
+
+/* ---- Service (48h) ---- */
+function demarrerService(empId){
+  const e = getEmp(empId);
+  if(e.statutCourant === 'repos_obligatoire' && e.reposFin && Date.now() < e.reposFin){
+    const reste = ((e.reposFin - Date.now())/HEURE).toFixed(1);
+    if(!confirm(`Le repos obligatoire de 48 h n'est pas terminé (encore ${reste} h). Démarrer le service quand même ?`)) return;
+  }
+  e.statutCourant = 'en_service';
+  e.serviceDebut = Date.now();
+  e.reposDebut = null; e.reposFin = null;
+  e.historiqueStatuts.push({type:'service', dateDebut: e.serviceDebut, dateFin: null, motif:'Prise de service — ' + (e.lieuActuel||''), cloture:false});
+  saveState();
+  renderAll();
+  openDetail(empId);
+}
+function terminerService(empId){
+  const e = getEmp(empId);
+  const now = Date.now();
+  const dernier = [...e.historiqueStatuts].reverse().find(s=> s.type==='service' && !s.cloture);
+  if(dernier){ dernier.dateFin = now; dernier.cloture = true; }
+  e.statutCourant = 'repos_obligatoire';
+  e.serviceDebut = null;
+  e.reposDebut = now;
+  e.reposFin = now + DUREE_REPOS_OBLIGATOIRE;
+  saveState();
+  renderAll();
+  openDetail(empId);
+}
+
+/* ---------------------------------------------------------
+   FICHE EMPLOYÉ (DÉTAIL)
+--------------------------------------------------------- */
+function getEmp(id){ return state.employees.find(e=>e.id===id); }
+
+function openDetail(id){
+  currentDetailId = id;
+  showPage('detail');
+  renderDetail(id);
+}
+
+function renderDetail(id){
+  reconcileStatuses();
+  const e = getEmp(id);
+  if(!e){ document.getElementById('detail-content').innerHTML = '<div class="empty">Employé introuvable.</div>'; return; }
+
+  const h = e.statutCourant==='en_service' ? heuresEcoulees(e.serviceDebut) : null;
+  const over = h!==null && h>48;
+
+  let actions = '';
+  if(e.statutCourant === 'disponible' || (e.statutCourant==='repos_obligatoire' && Date.now()>=e.reposFin)){
+    actions += `<button class="btn pine" onclick="demarrerService('${e.id}')">Démarrer le service</button>`;
+    actions += `<button class="btn secondary" onclick="openStatutModal('${e.id}','repos_sanitaire')">Repos sanitaire</button>`;
+    actions += `<button class="btn secondary" onclick="openStatutModal('${e.id}','conge')">Congé</button>`;
+    actions += `<button class="btn secondary" onclick="openStatutModal('${e.id}','permission')">Permission</button>`;
+  } else if(e.statutCourant === 'en_service'){
+    actions += `<button class="btn blue" onclick="terminerService('${e.id}')">Terminer le service</button>`;
+  } else if(e.statutCourant === 'repos_obligatoire'){
+    const reste = ((e.reposFin - Date.now())/HEURE).toFixed(1);
+    actions += `<button class="btn secondary" disabled>Repos obligatoire — encore ${reste} h</button>`;
+    actions += `<button class="btn secondary" onclick="demarrerService('${e.id}')">Forcer la prise de service</button>`;
+  } else {
+    actions += `<button class="btn pine" onclick="terminerStatutCourant('${e.id}')">Mettre fin au statut — retour disponible</button>`;
+  }
+  actions += `<button class="btn secondary" onclick="openChangeGrade('${e.id}')">Changer de grade</button>`;
+  actions += `<button class="btn secondary" onclick="openChangeLieu('${e.id}')">Changer de lieu</button>`;
+  actions += `<button class="btn brick" onclick="supprimerEmploye('${e.id}')">Supprimer l'employé</button>`;
+
+  const historiqueCombine = [
+    ...e.historiqueGrades.map(h=>({...h, kind:'Grade', label:h.grade})),
+    ...e.historiqueLieux.map(h=>({...h, kind:'Lieu', label:h.lieu})),
+    ...e.historiqueStatuts.map(h=>({...h, kind: h.type==='service'?'Service':statutLabel(h.type), label: h.motif || ''}))
+  ].sort((a,b)=> b.dateDebut - a.dateDebut);
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-head">
+      <div>
+        <h2>${fullName(e)}</h2>
+        <div class="detail-id mono">${e.matricule} · embauché le ${fmtDate(e.dateEmbauche)}</div>
+      </div>
+      <span class="badge ${e.statutCourant}" style="font-size:13px; padding:6px 14px;">${statutLabel(e.statutCourant)}</span>
+    </div>
+
+    ${over ? `<div class="alert-box"><h3>Dépassement des 48 h de service</h3><div class="alert-row">En service depuis ${h.toFixed(1)} h — dépassement de ${(h-48).toFixed(1)} h.</div></div>` : ''}
+
+    <div class="detail-grid">
+      <div>
+        <div class="panel">
+          <div class="panel-head"><h3>Informations</h3></div>
+          <div class="infolist" style="padding:16px 18px;">
+            <div><div class="k">Grade actuel</div><div class="v">${e.gradeActuel}</div></div>
+            <div><div class="k">Lieu actuel</div><div class="v">${e.lieuActuel || '—'}</div></div>
+            <div><div class="k">Téléphone</div><div class="v">${e.telephone || '—'}</div></div>
+            <div><div class="k">Date d'embauche</div><div class="v">${fmtDate(e.dateEmbauche)}</div></div>
+            ${e.statutCourant==='en_service' ? `<div><div class="k">Début de service</div><div class="v">${fmtDateTime(e.serviceDebut)}</div></div>` : ''}
+            ${e.statutCourant==='repos_obligatoire' ? `<div><div class="k">Fin du repos obligatoire</div><div class="v">${fmtDateTime(e.reposFin)}</div></div>` : ''}
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Historique</h3></div>
+          <div class="timeline">
+            ${historiqueCombine.length ? historiqueCombine.map(h=>`
+              <div class="tl-row">
+                <div class="tl-dot ${h.dateFin ? 'past':''}"></div>
+                <div class="tl-main">
+                  <strong>${h.kind}</strong>${h.label ? ' — ' + h.label : ''}
+                  <div class="tl-date">${fmtDate(h.dateDebut)} ${h.dateFin ? '→ ' + fmtDate(h.dateFin) : '→ en cours'}</div>
+                </div>
+              </div>
+            `).join('') : '<div class="empty">Aucun historique.</div>'}
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:18px;">
+        <h3 style="font-size:15px; margin-bottom:12px;">Actions</h3>
+        <div class="action-grid">${actions}</div>
+      </div>
+    </div>
+  `;
+}
+
+function supprimerEmploye(id){
+  if(!confirm('Supprimer définitivement cet employé et son historique ?')) return;
+  state.employees = state.employees.filter(e=>e.id!==id);
+  saveState();
+  showPage('employees');
+  renderAll();
+}
+
+/* ---------------------------------------------------------
+   RAFRAÎCHISSEMENT PÉRIODIQUE (compteurs 48h en direct)
+--------------------------------------------------------- */
+setInterval(()=>{
+  reconcileStatuses();
+  const activePage = document.querySelector('.page.active').id;
+  if(activePage==='page-dashboard') renderDashboard();
+  if(activePage==='page-detail' && currentDetailId) renderDetail(currentDetailId);
+  if(activePage==='page-employees') renderEmployeesList();
+}, 30000);
+
+loadState();
+</script>
+</body>
+</html>
